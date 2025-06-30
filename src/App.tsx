@@ -3,9 +3,12 @@ import { SearchForm } from './components/SearchForm';
 import { DisambiguationModal } from './components/DisambiguationModal';
 import { ContentResults } from './components/ContentResults';
 import { RegionSelector } from './components/RegionSelector';
+import { LanguageToggle } from './components/LanguageToggle';
 import { Tv, Sparkles } from 'lucide-react';
 import { TMDBService } from './services/tmdb';
 import { ALL_REGIONS } from './data/regions';
+import { useLanguage } from './hooks/useLanguage';
+import { t } from './utils/translations';
 import type { Content, SearchResult, Region } from './types';
 
 function App() {
@@ -15,6 +18,7 @@ function App() {
   const [selectedRegion, setSelectedRegion] = useState<Region>(ALL_REGIONS[0]); // Default to US
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { language, toggleLanguage } = useLanguage();
 
   const handleSearch = async (query: string) => {
     setIsLoading(true);
@@ -24,7 +28,7 @@ function App() {
       const results = await TMDBService.searchContent(query);
       
       if (results.length === 0) {
-        setError('No results found. Try a different search term.');
+        setError(t('noResults', language));
         setSearchResults([]);
       } else if (results.length === 1) {
         // If only one result, fetch details immediately
@@ -36,7 +40,7 @@ function App() {
       }
     } catch (error) {
       console.error('Search error:', error);
-      setError('Failed to search for content. Please try again.');
+      setError(t('searchError', language));
     } finally {
       setIsLoading(false);
     }
@@ -59,11 +63,11 @@ function App() {
       if (content) {
         setSelectedContent(content);
       } else {
-        setError('Failed to load content details. Please try again.');
+        setError(t('detailsError', language));
       }
     } catch (error) {
       console.error('Content details error:', error);
-      setError('Failed to load content details. Please try again.');
+      setError(t('detailsError', language));
     } finally {
       setIsLoading(false);
     }
@@ -92,26 +96,32 @@ function App() {
               <Tv className="w-8 h-8 text-purple-400" />
             </div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
-              StreamFinder
+              {t('appName', language)}
             </h1>
             <Sparkles className="w-6 h-6 text-purple-400" />
           </div>
-          <p className="text-xl text-slate-300 max-w-2xl mx-auto">
-            Discover where to watch your favorite movies and TV shows across all streaming platforms
+          <p className="text-xl text-slate-300 max-w-2xl mx-auto mb-6">
+            {t('tagline', language)}
           </p>
+          
+          {/* Language Toggle */}
+          <div className="flex justify-center">
+            <LanguageToggle language={language} onToggle={toggleLanguage} />
+          </div>
         </div>
 
         {/* Region Selector */}
         <div className="mb-8">
           <RegionSelector 
             selectedRegion={selectedRegion} 
-            onRegionChange={handleRegionChange} 
+            onRegionChange={handleRegionChange}
+            language={language}
           />
         </div>
 
         {/* Search Form */}
         <div className="mb-12">
-          <SearchForm onSearch={handleSearch} isLoading={isLoading} />
+          <SearchForm onSearch={handleSearch} isLoading={isLoading} language={language} />
         </div>
 
         {/* Error Message */}
@@ -129,6 +139,7 @@ function App() {
             content={selectedContent} 
             region={selectedRegion}
             onNewSearch={handleNewSearch}
+            language={language}
           />
         )}
 
@@ -138,6 +149,7 @@ function App() {
             results={searchResults}
             onSelect={handleContentSelect}
             onClose={() => setShowDisambiguation(false)}
+            language={language}
           />
         )}
       </div>

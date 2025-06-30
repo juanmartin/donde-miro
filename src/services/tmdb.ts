@@ -14,19 +14,44 @@ export class TMDBService {
   private static getBaseURL(): string {
     // Use the current domain for production, localhost for development
     if (typeof window !== 'undefined') {
+      const { protocol, hostname, port } = window.location;
+      
+      // For Netlify deployment
+      if (hostname.includes('netlify.app') || hostname.includes('netlify.com')) {
+        return `${protocol}//${hostname}`;
+      }
+      
+      // For local development with Netlify CLI
+      if (hostname === 'localhost' && port === '8888') {
+        return `${protocol}//${hostname}:${port}`;
+      }
+      
+      // For regular Vite dev server
+      if (hostname === 'localhost') {
+        return 'http://localhost:8888'; // Netlify dev server
+      }
+      
       return window.location.origin;
     }
-    return 'http://localhost:8888'; // Netlify dev server default
+    return 'http://localhost:8888';
   }
 
   private static async fetchFromFunction(endpoint: string, params: URLSearchParams): Promise<any> {
     const baseURL = this.getBaseURL();
     const url = `${baseURL}/.netlify/functions/${endpoint}?${params.toString()}`;
     
+    console.log('Fetching from:', url); // Debug log
+    
     const response = await fetch(url);
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-      throw new Error(errorData.error || `API error: ${response.statusText}`);
+      let errorMessage = `API error: ${response.status} ${response.statusText}`;
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorMessage;
+      } catch {
+        // If we can't parse the error response, use the default message
+      }
+      throw new Error(errorMessage);
     }
     return response.json();
   }

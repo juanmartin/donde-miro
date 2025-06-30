@@ -1,15 +1,19 @@
 import React from 'react';
 import { ExternalLink, Play, CreditCard, Gift, Tv } from 'lucide-react';
+import { t } from '../utils/translations';
 import type { StreamingProvider } from '../types';
+import type { Language } from '../hooks/useLanguage';
 
 interface StreamingProviderCardProps {
   provider: StreamingProvider;
   contentTitle: string;
+  language: Language;
 }
 
 export const StreamingProviderCard: React.FC<StreamingProviderCardProps> = ({
   provider,
-  contentTitle
+  contentTitle,
+  language
 }) => {
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -47,32 +51,32 @@ export const StreamingProviderCard: React.FC<StreamingProviderCardProps> = ({
   const getActionText = (type: string) => {
     switch (type) {
       case 'subscription':
-        return 'Watch Now';
+        return t('watchNow', language);
       case 'rent':
-        return provider.price ? `Rent ${provider.price}` : 'Rent';
+        return provider.price ? `${t('rent', language)} ${provider.price}` : t('rent', language);
       case 'buy':
-        return provider.price ? `Buy ${provider.price}` : 'Buy';
+        return provider.price ? `${t('buy', language)} ${provider.price}` : t('buy', language);
       case 'free':
-        return 'Watch Free';
+        return t('watchFree', language);
       case 'ads':
-        return 'Watch with Ads';
+        return t('watchWithAds', language);
       default:
-        return 'Watch';
+        return t('watchNow', language);
     }
   };
 
   const getTypeLabel = (type: string) => {
     switch (type) {
       case 'subscription':
-        return 'Subscription';
+        return t('subscription', language);
       case 'rent':
-        return 'Rental';
+        return t('rental', language);
       case 'buy':
-        return 'Purchase';
+        return t('purchase', language);
       case 'free':
-        return 'Free';
+        return t('free', language);
       case 'ads':
-        return 'Ad-supported';
+        return t('adSupported', language);
       default:
         return type;
     }
@@ -103,7 +107,7 @@ export const StreamingProviderCard: React.FC<StreamingProviderCardProps> = ({
           <div>
             <h3 className="font-semibold text-white text-lg">{provider.name}</h3>
             {provider.quality && (
-              <p className="text-slate-400 text-sm">{provider.quality} Quality</p>
+              <p className="text-slate-400 text-sm">{provider.quality} {t('quality', language)}</p>
             )}
           </div>
         </div>
@@ -132,7 +136,7 @@ export const StreamingProviderCard: React.FC<StreamingProviderCardProps> = ({
         </a>
         
         <p className="text-xs text-slate-400 text-center">
-          Opens {provider.name} in new tab
+          {t('opens', language)} {provider.name} {t('inNewTab', language)}
         </p>
       </div>
     </div>

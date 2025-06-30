@@ -1,24 +1,19 @@
 import React, { useState } from 'react';
 import { Search, Loader2 } from 'lucide-react';
+import { t } from '../utils/translations';
+import type { Language } from '../hooks/useLanguage';
 
 interface SearchFormProps {
   onSearch: (query: string) => void;
   isLoading: boolean;
+  language: Language;
 }
 
-export const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
+export const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading, language }) => {
   const [query, setQuery] = useState('');
-  const [suggestions] = useState([
-    'Breaking Bad',
-    'The Office',
-    'Stranger Things',
-    'Game of Thrones',
-    'The Mandalorian',
-    'Friends',
-    'The Crown',
-    'Ozark'
-  ]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const suggestions = t('suggestions', language) as string[];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,7 +49,7 @@ export const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) =
                   setShowSuggestions(true);
                 }}
                 onFocus={() => setShowSuggestions(true)}
-                placeholder="Search for movies, TV shows..."
+                placeholder={t('searchPlaceholder', language)}
                 className="flex-1 bg-transparent text-white placeholder-slate-400 text-lg outline-none"
                 disabled={isLoading}
               />
@@ -66,10 +61,10 @@ export const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) =
                 {isLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Searching...
+                    {t('searching', language)}
                   </>
                 ) : (
-                  'Search'
+                  t('searchButton', language)
                 )}
               </button>
             </div>

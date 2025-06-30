@@ -1,18 +1,22 @@
 import React from 'react';
 import { Calendar, Star, Users, Film, Tv, ArrowLeft, Clock, Layers } from 'lucide-react';
 import { StreamingProviderCard } from './StreamingProviderCard';
+import { t } from '../utils/translations';
 import type { Content, Region } from '../types';
+import type { Language } from '../hooks/useLanguage';
 
 interface ContentResultsProps {
   content: Content;
   region: Region;
   onNewSearch: () => void;
+  language: Language;
 }
 
 export const ContentResults: React.FC<ContentResultsProps> = ({
   content,
   region,
-  onNewSearch
+  onNewSearch,
+  language
 }) => {
   const providers = content.streamingProviders[region.code] || [];
 
@@ -24,7 +28,7 @@ export const ContentResults: React.FC<ContentResultsProps> = ({
         className="flex items-center gap-2 text-purple-300 hover:text-white transition-colors duration-200 mb-8 group"
       >
         <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
-        <span>Search for something else</span>
+        <span>{t('searchSomethingElse', language)}</span>
       </button>
 
       <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl overflow-hidden">
@@ -66,12 +70,12 @@ export const ContentResults: React.FC<ContentResultsProps> = ({
                     {content.type === 'movie' ? (
                       <>
                         <Film className="w-4 h-4" />
-                        <span>Movie</span>
+                        <span>{t('movie', language)}</span>
                       </>
                     ) : (
                       <>
                         <Tv className="w-4 h-4" />
-                        <span>TV Series</span>
+                        <span>{t('tvSeries', language)}</span>
                       </>
                     )}
                   </div>
@@ -84,7 +88,9 @@ export const ContentResults: React.FC<ContentResultsProps> = ({
                   {content.seasons && (
                     <div className="flex items-center gap-1">
                       <Layers className="w-4 h-4" />
-                      <span>{content.seasons} season{content.seasons !== 1 ? 's' : ''}</span>
+                      <span>
+                        {content.seasons} {content.seasons === 1 ? t('season', language) : t('seasons', language)}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -112,7 +118,7 @@ export const ContentResults: React.FC<ContentResultsProps> = ({
                 <div className="mb-6">
                   <h3 className="text-xl font-semibold text-white mb-3 flex items-center gap-2">
                     <Users className="w-5 h-5 text-purple-300" />
-                    Cast
+                    {t('cast', language)}
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {content.cast.map((actor, index) => (
@@ -134,10 +140,10 @@ export const ContentResults: React.FC<ContentResultsProps> = ({
         <div className="border-t border-white/20 p-8">
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-white mb-2">
-              Where to Watch in {region.flag} {region.name}
+              {t('whereToWatch', language)} {region.flag} {region.name}
             </h2>
             <p className="text-slate-300">
-              Available on {providers.length} platform{providers.length !== 1 ? 's' : ''}
+              {t('availableOn', language)} {providers.length} {providers.length === 1 ? t('platform', language) : t('platforms', language)}
             </p>
           </div>
 
@@ -148,6 +154,7 @@ export const ContentResults: React.FC<ContentResultsProps> = ({
                   key={`${provider.provider_id}-${provider.type}-${index}`} 
                   provider={provider}
                   contentTitle={content.title}
+                  language={language}
                 />
               ))}
             </div>
@@ -155,13 +162,13 @@ export const ContentResults: React.FC<ContentResultsProps> = ({
             <div className="text-center py-12">
               <div className="text-6xl mb-4">😔</div>
               <h3 className="text-xl font-semibold text-white mb-2">
-                Not Available in {region.name}
+                {t('notAvailable', language)} {region.name}
               </h3>
               <p className="text-slate-300 mb-4">
-                This content is not currently available for streaming in your region.
+                {t('notAvailableDesc', language)}
               </p>
               <p className="text-sm text-slate-400">
-                Try selecting a different region or check back later.
+                {t('tryDifferentRegion', language)}
               </p>
             </div>
           )}

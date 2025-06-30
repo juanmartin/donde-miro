@@ -1,24 +1,28 @@
 import React from 'react';
 import { X, Calendar, Film, Tv } from 'lucide-react';
+import { t } from '../utils/translations';
 import type { SearchResult } from '../types';
+import type { Language } from '../hooks/useLanguage';
 
 interface DisambiguationModalProps {
   results: SearchResult[];
   onSelect: (result: SearchResult) => void;
   onClose: () => void;
+  language: Language;
 }
 
 export const DisambiguationModal: React.FC<DisambiguationModalProps> = ({
   results,
   onSelect,
-  onClose
+  onClose,
+  language
 }) => {
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-white/20">
-          <h2 className="text-2xl font-bold text-white">Multiple Results Found</h2>
+          <h2 className="text-2xl font-bold text-white">{t('multipleResults', language)}</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-white/10 rounded-lg transition-colors duration-200"
@@ -30,7 +34,7 @@ export const DisambiguationModal: React.FC<DisambiguationModalProps> = ({
         {/* Results */}
         <div className="p-6 space-y-4 max-h-96 overflow-y-auto">
           <p className="text-slate-300 mb-6">
-            We found multiple matches. Please select the one you're looking for:
+            {t('multipleResultsDesc', language)}
           </p>
           
           {results.map((result) => (
@@ -68,12 +72,12 @@ export const DisambiguationModal: React.FC<DisambiguationModalProps> = ({
                       {result.type === 'movie' ? (
                         <>
                           <Film className="w-4 h-4" />
-                          <span>Movie</span>
+                          <span>{t('movie', language)}</span>
                         </>
                       ) : (
                         <>
                           <Tv className="w-4 h-4" />
-                          <span>TV Series</span>
+                          <span>{t('tvSeries', language)}</span>
                         </>
                       )}
                     </div>

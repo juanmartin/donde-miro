@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, ChevronDown, Loader2, Check, Search } from 'lucide-react';
 import { ALL_REGIONS, POPULAR_REGIONS, searchRegions } from '../data/regions';
+import { t } from '../utils/translations';
 import type { Region } from '../types';
+import type { Language } from '../hooks/useLanguage';
 
 interface RegionSelectorProps {
   selectedRegion: Region;
   onRegionChange: (region: Region) => void;
+  language: Language;
 }
 
 export const RegionSelector: React.FC<RegionSelectorProps> = ({
   selectedRegion,
-  onRegionChange
+  onRegionChange,
+  language
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDetecting, setIsDetecting] = useState(false);
@@ -102,7 +106,7 @@ export const RegionSelector: React.FC<RegionSelectorProps> = ({
                   <MapPin className="w-4 h-4 text-purple-300" />
                 )}
                 <span className={isDetecting ? 'text-slate-300' : ''}>
-                  {isDetecting ? 'Detecting your location...' : 'Auto-detect my location'}
+                  {isDetecting ? t('detectingLocation', language) : t('autoDetectLocation', language)}
                 </span>
               </button>
 
@@ -114,7 +118,7 @@ export const RegionSelector: React.FC<RegionSelectorProps> = ({
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search countries..."
+                    placeholder={t('searchCountries', language)}
                     className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-400 text-sm outline-none focus:border-purple-400"
                   />
                 </div>
@@ -124,7 +128,7 @@ export const RegionSelector: React.FC<RegionSelectorProps> = ({
               <div className="max-h-64 overflow-y-auto">
                 {!searchQuery.trim() && (
                   <div className="px-4 py-2 text-xs text-slate-400 uppercase tracking-wide">
-                    Popular Regions
+                    {t('popularRegions', language)}
                   </div>
                 )}
                 
@@ -154,7 +158,7 @@ export const RegionSelector: React.FC<RegionSelectorProps> = ({
                 {!searchQuery.trim() && (
                   <>
                     <div className="px-4 py-2 text-xs text-slate-400 uppercase tracking-wide border-t border-white/10 mt-2">
-                      All Regions
+                      {t('allRegions', language)}
                     </div>
                     {ALL_REGIONS.slice(15).map((region) => (
                       <button
