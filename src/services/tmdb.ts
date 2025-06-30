@@ -1,12 +1,4 @@
-// TMDB API Configuration
-const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
-const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
-
-// Validate API key is present
-if (!TMDB_API_KEY) {
-  throw new Error('TMDB API key is required. Please set VITE_TMDB_API_KEY in your environment variables.');
-}
 
 import type { 
   TMDBSearchResult, 
@@ -19,20 +11,30 @@ import type {
 } from '../types';
 
 export class TMDBService {
-  private static async fetchTMDB(endpoint: string): Promise<any> {
-    const response = await fetch(`${TMDB_BASE_URL}${endpoint}?api_key=${TMDB_API_KEY}`);
+  private static getBaseURL(): string {
+    // Use the current domain for production, localhost for development
+    if (typeof window !== 'undefined') {
+      return window.location.origin;
+    }
+    return 'http://localhost:8888'; // Netlify dev server default
+  }
+
+  private static async fetchFromFunction(endpoint: string, params: URLSearchParams): Promise<any> {
+    const baseURL = this.getBaseURL();
+    const url = `${baseURL}/.netlify/functions/${endpoint}?${params.toString()}`;
+    
+    const response = await fetch(url);
     if (!response.ok) {
-      if (response.status === 401) {
-        throw new Error('Invalid TMDB API key. Please check your configuration.');
-      }
-      throw new Error(`TMDB API error: ${response.statusText}`);
+      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(errorData.error || `API error: ${response.statusText}`);
     }
     return response.json();
   }
 
   static async searchContent(query: string): Promise<SearchResult[]> {
     try {
-      const data = await this.fetchTMDB(`/search/multi?query=${encodeURIComponent(query)}`);
+      const params = new URLSearchParams({ query });
+      const data = await this.fetchFromFunction('tmdb-search', params);
       
       return data.results
         .filter((item: TMDBSearchResult) => 
@@ -50,35 +52,31 @@ export class TMDBService {
         }));
     } catch (error) {
       console.error('Error searching TMDB:', error);
-      return [];
+      throw error;
     }
   }
 
   static async getMovieDetails(id: string): Promise<Content | null> {
     try {
-      const [details, watchProviders] = await Promise.all([
-        this.fetchTMDB(`/movie/${id}?append_to_response=credits`),
-        this.fetchTMDB(`/movie/${id}/watch/providers`)
-      ]);
+      const params = new URLSearchParams({ id });
+      const { details, watchProviders } = await this.fetchFromFunction('tmdb-movie', params);
 
       return this.formatMovieContent(details, watchProviders);
     } catch (error) {
       console.error('Error fetching movie details:', error);
-      return null;
+      throw error;
     }
   }
 
   static async getTVDetails(id: string): Promise<Content | null> {
     try {
-      const [details, watchProviders] = await Promise.all([
-        this.fetchTMDB(`/tv/${id}?append_to_response=credits`),
-        this.fetchTMDB(`/tv/${id}/watch/providers`)
-      ]);
+      const params = new URLSearchParams({ id });
+      const { details, watchProviders } = await this.fetchFromFunction('tmdb-tv', params);
 
       return this.formatTVContent(details, watchProviders);
     } catch (error) {
       console.error('Error fetching TV details:', error);
-      return null;
+      throw error;
     }
   }
 
