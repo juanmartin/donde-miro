@@ -1,42 +1,40 @@
+import { Handler } from '@netlify/functions';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
-export default async (request: Request) => {
-  if (request.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 200,
+export const handler: Handler = async (event, context) => {
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
       headers: corsHeaders,
-    });
+      body: '',
+    };
   }
 
   try {
-    const TMDB_API_KEY = Deno.env.get('TMDB_API_KEY');
+    const TMDB_API_KEY = process.env.TMDB_API_KEY;
     
     if (!TMDB_API_KEY) {
       console.error('TMDB_API_KEY environment variable is not set');
-      return new Response(
-        JSON.stringify({ error: 'TMDB API key not configured' }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
+      return {
+        statusCode: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'TMDB API key not configured' }),
+      };
     }
 
-    const url = new URL(request.url);
-    const id = url.searchParams.get('id');
+    const id = event.queryStringParameters?.id;
     
     if (!id) {
-      return new Response(
-        JSON.stringify({ error: 'TV show ID parameter is required' }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
+      return {
+        statusCode: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'TV show ID parameter is required' }),
+      };
     }
 
     console.log('Fetching TV show details for ID:', id);
@@ -58,19 +56,18 @@ export default async (request: Request) => {
 
     console.log('TV show details fetched successfully for:', details.name);
 
-    return new Response(JSON.stringify({ details, watchProviders }), {
-      status: 200,
+    return {
+      statusCode: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+      body: JSON.stringify({ details, watchProviders }),
+    };
 
   } catch (error) {
     console.error('Error in tmdb-tv function:', error);
-    return new Response(
-      JSON.stringify({ error: error.message || 'Internal server error' }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    );
+    return {
+      statusCode: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: error.message || 'Internal server error' }),
+    };
   }
 };

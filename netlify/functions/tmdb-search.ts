@@ -1,43 +1,41 @@
+import { Handler } from '@netlify/functions';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
-export default async (request: Request) => {
+export const handler: Handler = async (event, context) => {
   // Handle preflight requests
-  if (request.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 200,
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
       headers: corsHeaders,
-    });
+      body: '',
+    };
   }
 
   try {
-    const TMDB_API_KEY = Deno.env.get('TMDB_API_KEY');
+    const TMDB_API_KEY = process.env.TMDB_API_KEY;
     
     if (!TMDB_API_KEY) {
       console.error('TMDB_API_KEY environment variable is not set');
-      return new Response(
-        JSON.stringify({ error: 'TMDB API key not configured' }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
+      return {
+        statusCode: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'TMDB API key not configured' }),
+      };
     }
 
-    const url = new URL(request.url);
-    const query = url.searchParams.get('query');
+    const query = event.queryStringParameters?.query;
     
     if (!query) {
-      return new Response(
-        JSON.stringify({ error: 'Query parameter is required' }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
+      return {
+        statusCode: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'Query parameter is required' }),
+      };
     }
 
     console.log('Searching TMDB for:', query);
@@ -54,19 +52,18 @@ export default async (request: Request) => {
     const data = await tmdbResponse.json();
     console.log('TMDB search results:', data.results?.length || 0, 'items');
     
-    return new Response(JSON.stringify(data), {
-      status: 200,
+    return {
+      statusCode: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+      body: JSON.stringify(data),
+    };
 
   } catch (error) {
     console.error('Error in tmdb-search function:', error);
-    return new Response(
-      JSON.stringify({ error: error.message || 'Internal server error' }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    );
+    return {
+      statusCode: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: error.message || 'Internal server error' }),
+    };
   }
 };
