@@ -1,3 +1,33 @@
+# Donde Miro
+
+Experimento AI full vibe coded con [Bolt.new](https://bolt.new/).
+
+La webapp es para ver en qué plataforma está disponible el contenido buscado según la región del usuario. [Just Watch](https://www.justwatch.com/) hace eso, re bien, pero me avivé después de que hice esto xD.
+
+Le iré agregando cosas como un ser humano pero a la hora de escribir esto no escribí ni leí una sola línea de código.
+
+Lo único que hice fue sacarme una API key en [TMDB](https://www.themoviedb.org/) y meterla como secret para que la usen unas edge functions onda backend en [Netlify](https://www.netlify.com/) porque la IA me dijo que así no queda expuesta client side si la metía como env var (`.env`/Secrets) en el código del frontend 🧞. Piola eso 👍.
+
+Lo piola es que el stack es re mi go-to: TS + Vite + TailwindCSS + ... y bue React.
+
+## TO-DO
+
+- [ ] Meter captcha!!❗
+- [ ] Arreglar mobile.
+- [ ] Link a Stremio!!! (en todas).
+- [ ] Sacar esas regiones "populares" cipayas. Poner al campeón del mundo arriba de todo 🇦🇷.
+- [ ] Usar más data que trae la request.. si pinta algo interesante.
+- [ ] Agregar créditos abajo "made with <3 and AI" kindofshit (link acá).
+- [ ] Traducir lo que viene de la API si está en ES porque TMDB me trae en EN (capaz hay otro query o endpoint para pedir traducciones?)
+- [ ] Meter mejores analytics??
+- [ ] flasharla..
+
+------------
+
+# De acá en adelante es IA
+
+--------
+
 # StreamFinder
 
 A beautiful web application to discover where to watch your favorite movies and TV shows across all streaming platforms.
